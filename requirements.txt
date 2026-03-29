@@ -1,0 +1,10 @@
+google-cloud-storage
+google-cloud-bigquery
+google-cloud-aiplatform
+google-genai
+pandas
+pyarrow
+fastapi
+uvicorn[standard]
+python-dotenv
+google-adk
