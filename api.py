@@ -4,7 +4,7 @@ from google.cloud import bigquery, aiplatform
 from diagnostics import diagnose, DiagnosisResult
 from dotenv import load_dotenv
 import logging
-from config import PROJECT_ID, REGION, BQ_TABLE, VS_ENDPOINT_ID
+from config import PROJECT_ID, REGION, BQ_TABLE, EMBEDDING_MODEL, VS_ENDPOINT_ID
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -84,3 +84,38 @@ async def diagnose_route(vehicle_id: str, error_code: str,
         vehicle_id=vehicle_id, error_code=error_code,
         risk_level=result.risk_level, root_causes=result.root_causes,
         immediate_actions=result.immediate_actions, summary=result.summary)
+
+class SearchResult(BaseModel):
+    rank:           int
+    similarity_pct: float
+    vehicle_id:     str
+    error_code:     str
+
+class SearchResponse(BaseModel):
+    query_symptom: str
+    results:       list[SearchResult]
+
+
+@app.get("/search", response_model=SearchResponse)
+async def search_by_symptom(symptom: str = Query(..., description="Describe vehicle symptom in plain English")):
+    if VS_ENDPOINT_ID == "":
+        raise HTTPException(status_code=503, detail="Vertex AI Vector Search not configured")
+    from vertexai.language_models import TextEmbeddingModel
+    model     = TextEmbeddingModel.from_pretrained(EMBEDDING_MODEL)
+    query_vec = model.get_embeddings([symptom])[0].values
+    endpoint  = aiplatform.MatchingEngineIndexEndpoint(VS_ENDPOINT_ID)
+    response  = endpoint.find_neighbors(
+        deployed_index_id="vehicle_errors_v3",
+        queries=[query_vec],
+        num_neighbors=3
+    )
+    results = [
+        SearchResult(
+            rank=i+1,
+            similarity_pct=round(n.distance*100,1),
+            vehicle_id=n.id.split("_")[0],
+            error_code="_".join(n.id.split("_")[1:])
+        )
+        for i,n in enumerate(response[0])
+    ]
+    return SearchResponse(query_symptom=symptom, results=results)
