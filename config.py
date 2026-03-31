@@ -1,9 +1,9 @@
-PROJECT_ID       = "vehicle-diagnostics-491610"   # your actual project ID
+PROJECT_ID       = "vehicle-diagnostics-491610"
 REGION           = "asia-south1"
 BUCKET           = "vehicle-logs-sachin"
 BQ_DATASET       = "vehicle_diagnostics"
 BQ_TABLE         = f"{PROJECT_ID}.{BQ_DATASET}.error_logs"
 GEMINI_MODEL     = "gemini-2.5-flash"
 EMBEDDING_MODEL  = "text-embedding-004"
-VS_INDEX_ID      = "8698605923242868736"   # fill after Phase 1 Step 3
-VS_ENDPOINT_ID   = "6018225273143558144"   # fill after Phase 1 Step 3
+VS_INDEX_ID      = "8698605923242868736"
+VS_ENDPOINT_ID   = "6018225273143558144"
