@@ -1,0 +1,27 @@
+P0171 - System Too Lean (Bank 1)
+Description: The oxygen sensor detects more oxygen than expected, indicating a lean fuel mixture.
+Causes: Air intake leak after MAF sensor, faulty MAF sensor, clogged fuel injectors, weak fuel pump.
+Symptoms: Rough idle, poor acceleration, check engine light, possible misfire.
+Repair: Inspect vacuum hoses and intake manifold, test MAF sensor, check fuel pressure (should be 55-65 PSI).
+Severity: HIGH - can cause catalytic converter damage if left unrepaired.
+
+P0300 - Random/Multiple Cylinder Misfire Detected
+Description: The ECU detects misfires in multiple cylinders.
+Causes: Fouled spark plugs, faulty ignition coils, clogged fuel injectors, low compression.
+Symptoms: Engine shaking, rough idle, poor fuel economy, check engine light flashing.
+Repair: Replace spark plugs, test ignition coils with multimeter, run fuel injector cleaner.
+Severity: HIGH - continued driving can cause catalytic converter damage.
+
+P0128 - Coolant Temperature Below Thermostat Regulating Temperature
+Description: The coolant temperature sensor reads below the expected temperature after warmup.
+Causes: Faulty thermostat (stuck open), faulty coolant temperature sensor.
+Symptoms: Engine takes long to warm up, heater produces cold air, reduced fuel economy.
+Repair: Replace thermostat (cheap part, about 500 INR), test coolant temp sensor.
+Severity: MEDIUM - affects fuel economy and cabin heating, not immediately dangerous.
+
+P0420 - Catalyst System Efficiency Below Threshold (Bank 1)
+Description: The downstream oxygen sensor detects the catalytic converter is not cleaning exhaust efficiently.
+Causes: Worn catalytic converter, damaged oxygen sensor, oil burning, coolant leak into exhaust.
+Symptoms: Sulfur smell, check engine light, may fail emissions test.
+Repair: Check for oil or coolant leaks first. Replace catalytic converter if necessary (expensive).
+Severity: MEDIUM - vehicle is still drivable but will fail emissions.

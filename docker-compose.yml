@@ -1,0 +1,24 @@
+services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    env_file: .env
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PUBSUB_EMULATOR_HOST=pubsub_emulator:8085
+    depends_on:
+      - pubsub_emulator
+    volumes:
+      - ./:/app
+    command: uvicorn api:app --host 0.0.0.0 --port 8080 --reload
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  pubsub_emulator:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+    command: gcloud beta emulators pubsub start --host-port=0.0.0.0:8085
+    ports:
+      - "8085:8085"
