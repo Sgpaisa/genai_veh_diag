@@ -18,7 +18,10 @@ def get_vehicle_errors(vehicle_id: str) -> dict:
     Use this when the user asks about a specific vehicle's error history."""
     rows = bq.query(
         f"SELECT error_code, sensor, value, timestamp FROM `{BQ_TABLE}` "
-        f"WHERE vehicle_id = '{vehicle_id}' ORDER BY timestamp DESC LIMIT 20"
+        f"WHERE vehicle_id = @v ORDER BY timestamp DESC LIMIT 20",
+        job_config=bigquery.QueryJobConfig(
+            query_parameters=[bigquery.ScalarQueryParameter("v", "STRING", vehicle_id)]
+        )
     ).result()
     return {
         "vehicle_id": vehicle_id,
