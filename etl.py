@@ -79,7 +79,7 @@ def run_etl() -> None:
         all_dfs.append(df)
     combined = pd.concat(all_dfs, ignore_index=True)
     load_to_bigquery(combined)
-#   embed_and_index(combined)
+    embed_and_index(combined)
     logging.info(f"=== ETL complete: {len(combined)} rows ===")
 
 
