@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(& \"C:\\\\Program Files\\\\Python311\\\\python.exe\" -m pytest --version 2>&1)",
+      "PowerShell(& \"C:\\\\Program Files\\\\Python311\\\\python.exe\" -m pip install httpx fastapi 2>&1 | Select-Object -Last 3)",
+      "WebSearch",
+      "Bash(git -C \"C:/Users/SachinGattani/genai_veh_diag\" add .github/workflows/claude.yml)",
+      "Bash(git -C \"C:/Users/SachinGattani/genai_veh_diag\" status)",
+      "Bash(git -C \"C:/Users/SachinGattani/genai_veh_diag\" add .)",
+      "Bash(git -C \"C:/Users/SachinGattani/genai_veh_diag\" commit -m \"feat: add Claude Code GitHub Actions workflow\")",
+      "Bash(git -C \"C:/Users/SachinGattani/genai_veh_diag\" push)"
+    ]
+  }
+}
