@@ -8,7 +8,12 @@
       "Bash(git -C \"C:/Users/SachinGattani/genai_veh_diag\" status)",
       "Bash(git -C \"C:/Users/SachinGattani/genai_veh_diag\" add .)",
       "Bash(git -C \"C:/Users/SachinGattani/genai_veh_diag\" commit -m \"feat: add Claude Code GitHub Actions workflow\")",
-      "Bash(git -C \"C:/Users/SachinGattani/genai_veh_diag\" push)"
+      "Bash(git -C \"C:/Users/SachinGattani/genai_veh_diag\" push)",
+      "Bash(python *)",
+      "Bash(curl *)",
+      "Bash(gcloud auth *)",
+      "Bash(pkill -f \"uvicorn\")",
+      "PowerShell(Get-Process *)"
     ]
   }
 }
