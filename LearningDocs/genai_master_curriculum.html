@@ -67,6 +67,8 @@ tr:nth-child(even) td{background:#f8f7f3}
   <div class="tab" onclick="show(9)">🔌<small>P8 MCP</small></div>
   <div class="tab" onclick="show(10)">🎯<small>P9 Fine-tune</small></div>
   <div class="tab" onclick="show(11)">🚀<small>P10 Advanced</small></div>
+  <div class="tab" onclick="show(12)">📨<small>P11 Pub/Sub</small></div>
+  <div class="tab" onclick="show(13)">🗂️<small>Code Tour</small></div>
 </div>
 
 <!-- ═══════════════════════════════════════════ PAGE 0: MAP ═══ -->
@@ -87,10 +89,11 @@ tr:nth-child(even) td{background:#f8f7f3}
 <tr><td><b>P4</b></td><td>Production API — FastAPI, Pydantic, async, Docker, Cloud Run</td><td class="t-cowork" style="background:#fef3c7;color:#92400e">COWORK</td><td>api.py, Dockerfile</td><td><span class="badge bv">Refresh</span></td></tr>
 <tr><td><b>P5</b></td><td>Auth &amp; Security — OAuth2, JWT, RBAC, API keys, rate limiting</td><td class="t-chat" style="background:#dbeafe;color:#1e40af">CHAT</td><td>api.py + new auth_middleware.py</td><td><span class="badge br">NEW</span></td></tr>
 <tr><td><b>P6</b></td><td>Guardrails — NeMo, Llama Guard, Constitutional AI, Pydantic shield</td><td class="t-chat" style="background:#dbeafe;color:#1e40af">CHAT</td><td>new guardrails_layer.py</td><td><span class="badge br">NEW</span></td></tr>
-<tr><td><b>P7</b></td><td>Observability — LangSmith, tracing, LLM-as-judge evals</td><td class="t-cowork" style="background:#fef3c7;color:#92400e">COWORK</td><td>run_evals.py</td><td><span class="badge by">Partial</span></td></tr>
+<tr><td><b>P7</b></td><td>Observability — LangSmith, tracing, LLM-as-judge evals, pre/post-deploy eval lifecycle</td><td class="t-cowork" style="background:#fef3c7;color:#92400e">COWORK</td><td>run_evals.py, LearningDocs/eval_lab/</td><td><span class="badge by">Partial</span></td></tr>
 <tr><td><b>P8</b></td><td>MCP Protocol — server, tools, Claude Desktop integration</td><td class="t-chat" style="background:#dbeafe;color:#1e40af">CHAT</td><td>vehicle_mcp_server.py</td><td><span class="badge by">Partial</span></td></tr>
 <tr><td><b>P9</b></td><td>Fine-tuning — LoRA, QLoRA, PEFT, Vertex AI tuning</td><td class="t-chat" style="background:#dbeafe;color:#1e40af">CHAT</td><td>new finetune_demo.py</td><td><span class="badge br">NEW</span></td></tr>
 <tr><td><b>P10</b></td><td>Advanced — Agentic memory, multi-modal, cost optimization</td><td class="t-chat" style="background:#dbeafe;color:#1e40af">CHAT</td><td>various</td><td><span class="badge br">NEW</span></td></tr>
+<tr><td><b>P11</b></td><td>Pub/Sub — Event-driven ETL, GCS notifications, push subscriptions</td><td class="t-cowork" style="background:#fef3c7;color:#92400e">COWORK</td><td>pubsub_trigger.py, api.py, simulate_gcs_upload.py</td><td><span class="badge br">NEW</span></td></tr>
 </table>
 
 <div class="warn"><b>Golden Rule for this curriculum:</b> For every topic — first go to CHAT to understand "why does this exist and how does it work". Then come to COWORK to apply it to your genai_veh_diag project. Then go to CODE (Claude Code CLI) to implement, run, and test it. This sequence prevents cargo-culting (copying code without understanding).</div>
@@ -1287,6 +1290,46 @@ results = evaluate(
     <div class="ok"><b>COWORK prompt:</b> "Design a complete evaluation framework for my vehicle diagnostics API with 3 evaluators: (1) technical accuracy judged by Gemini, (2) hallucination detection (checks if root_causes contain plausible OBD-II causes), (3) safety check (High risk must always include 'inspect immediately'). Show the full run_evals.py."</div>
   </div>
 </div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#fef3c7;color:#92400e">7.4</div><div class="st"><b>The full eval lifecycle — pre-deploy gate, live monitoring, incident response</b><span>offline eval vs online monitoring · distribution drift · rollback playbook · hands-on lab in eval_lab/</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <div class="tool-row"><span class="tool t-chat">🟦 CHAT — why one eval alone isn't enough</span><span class="tool t-code">🟩 CODE — LearningDocs/eval_lab/</span></div>
+    <h4>7.1–7.3 answered "does this pass an eval." This step answers the harder question: how do you know performance stays intact after ship, and what do you actually do when it degrades?</h4>
+    <p>7.1–7.3 (and <code>run_evals.py</code>) are all <b>offline eval</b> — a fixed golden dataset, run once, before a deploy. That's necessary but not sufficient. Once live, three things can go wrong that a one-time offline eval will never catch:</p>
+    <table>
+      <tr><th>Failure mode</th><th>Why offline eval misses it</th><th>What catches it instead</th></tr>
+      <tr><td>Provider silently swaps the model behind a name like <code>gemini-2.5-flash</code></td><td>Your golden set didn't change, so nobody re-ran it</td><td>Continuous production monitoring on live traffic</td></tr>
+      <tr><td>Someone hotfixes the prompt directly, skipping the gate</td><td>Offline eval only runs in CI, on demand</td><td>A CI gate that blocks deploy on FAIL + monitoring as a backstop</td></tr>
+      <tr><td>Real-world input distribution drifts (fleet ages, new error codes appear)</td><td>Golden set is static, frozen at write-time</td><td>Output-distribution drift tracking vs. a known baseline</td></tr>
+      <tr><td>Model degrades gradually, not as a hard failure</td><td>Exact-match accuracy alone can look fine right up until it doesn't</td><td>Watching distribution shift, which often moves before accuracy visibly drops</td></tr>
+    </table>
+    <p>So a real eval strategy is three phases, not one:</p>
+    <table>
+      <tr><th>Phase</th><th>Question</th><th>Cadence</th><th>Your code</th></tr>
+      <tr><td>1. Offline eval</td><td>Is this new prompt/model version good enough to ship?</td><td>Every change, in CI</td><td><code>run_evals.py</code>, <code>eval_lab/offline_eval.py</code></td></tr>
+      <tr><td>2. Online monitoring</td><td>Is what I already shipped still good?</td><td>Continuous, on live traffic</td><td><code>eval_lab/production_monitor.py</code></td></tr>
+      <tr><td>3. Incident response</td><td>It broke — now what?</td><td>Triggered by an alert</td><td><code>eval_lab/respond_to_degradation.py</code></td></tr>
+    </table>
+    <h4>What to actually watch in production (in priority order)</h4>
+    <p>1) Hard-label accuracy on spot-checks (<code>risk_level</code> — safety-critical, weight heaviest). 2) Output-distribution drift vs. a known baseline — often the earliest signal, since a degrading model tends to collapse toward one "safe" answer (e.g. always "Medium") before it starts failing spot-checks outright. 3) Latency/cost — spikes often precede quality issues (provider incident, silent fallback to a smaller model). 4) Schema/parse-failure rate on <code>response_schema</code> outputs. 5) LLM-as-judge score on free text, since you can't <code>==</code> a paragraph.</p>
+    <pre># eval_lab/production_monitor.py — the core idea, simplified
+window = deque(maxlen=15)               # rolling window of recent predictions
+window.append(prediction_record)
+
+window_acc   = spot_check_accuracy(window)         # vs a sampled ground truth
+window_dist  = risk_level_distribution(window)     # e.g. {"High": .4, "Medium": .5, "Low": .1}
+shift        = total_variation_distance(BASELINE_DIST, window_dist)
+p95_latency  = percentile([w.latency_ms for w in window], 95)
+
+if window_acc < 0.75 or shift > 0.35 or p95_latency > 700:
+    raise_alert(window_acc, shift, p95_latency)     # -> logs/alerts.jsonl</pre>
+    <h4>When an alert fires: freeze → quarantine → diagnose → decide → re-verify</h4>
+    <p><code>eval_lab/respond_to_degradation.py</code> automates the first steps: write a <code>deploy_frozen.flag</code> (a real CI/CD pipeline would check for this and block new deploys), pull the flagged window of predictions into a review queue for a human, infer a likely cause from which signal broke first (latency-only often means a provider/infra issue; accuracy-drop is a confirmed regression), and append a timestamped entry to an incident log. The decision that follows is always one of: roll back to the last version that passed the offline gate, or — if it's a genuinely new input pattern rather than a regression — add it to the golden dataset so <code>offline_eval.py</code> catches that class of case on every future change. Never unfreeze deploys on "looks fine now" — always re-run the offline gate first.</p>
+    <div class="anchor">📁 Hands-on lab: <code>LearningDocs/eval_lab/</code> — runs standalone with a mock model (no GCP needed), so you can watch a simulated regression get caught and responded to end-to-end. Start with <code>eval_lab/README.md</code>, then <code>eval_lab/PLAYBOOK.md</code> for the full decision framework. It reuses the OBD-II risk-classification domain from <code>diagnostics.py</code> and extends <code>run_evals.py</code>'s exact-match approach with an LLM-as-judge score for free text.</div>
+    <div class="ok"><b>COWORK prompt:</b> "Wire eval_lab's production_monitor.py logic into api.py's /diagnose endpoint for real — log every request to BigQuery instead of a JSONL file, and compute the rolling distribution-shift metric as a scheduled query."</div>
+  </div>
+</div>
 </div><!-- end page 8 -->
 
 <!-- ═══════════════════════════════════ PAGE 9: PHASE 8 — MCP ═══ -->
@@ -1659,6 +1702,358 @@ def validate_output(result: DiagnosisResult) -> bool:
   </div>
 </div>
 </div><!-- end page 11 -->
+<!-- ═════════
+<!-- ═══════════════════════════════════ PAGE 12: PHASE 11 — PUB/SUB ═══ -->
+<div class="page" id="p12">
+<h3>Phase 11 — Pub/Sub: Event-Driven ETL (No More Manual python etl.py)</h3>
+<div class="tool-row">
+  <span class="tool t-chat">🟦 CHAT — understand pub/sub concepts, push vs pull</span>
+  <span class="tool t-cowork">🟨 COWORK — already done: pubsub_trigger.py + simulate_gcs_upload.py</span>
+  <span class="tool t-code">🟩 CODE — run gcloud setup commands, test locally with docker-compose</span>
+</div>
+<div class="info"><b>What changed:</b> Before — you manually ran <code>python etl.py</code> after uploading a CSV. After — upload a CSV to GCS and ETL runs automatically within seconds. Zero manual steps.</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#d1fae5;color:#065f46">11.1</div><div class="st"><b>Why Pub/Sub — The problem with manual ETL</b><span>Event-driven architecture · decoupling · why polling is wasteful</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <div class="tool-row"><span class="tool t-chat">🟦 CHAT first</span></div>
+    <h4>The problem</h4>
+    <p>Your <code>etl.py</code> is a script. Someone has to remember to run it after uploading a CSV. In production with a fleet of 500 vehicles sending data every hour, manual triggering does not scale.</p>
+    <h4>How Pub/Sub solves it</h4>
+    <p>Pub/Sub is a message broker. GCS publishes a message the instant a file lands. Your API subscribes and reacts immediately. No polling. No manual steps. The components are decoupled — GCS does not know or care who is listening.</p>
+    <pre>Old flow (manual):
+  You → upload CSV → remember to run python etl.py → ETL runs
+
+New flow (event-driven):
+  You → upload CSV
+           ↓ GCS fires OBJECT_FINALIZE event automatically
+        Pub/Sub topic: vehicle-csv-uploads
+           ↓ push subscription (immediate, no polling)
+        POST /etl/trigger on Cloud Run
+           ↓
+        run_etl() → BigQuery + Vector Search updated
+        (all within ~5 seconds of upload)</pre>
+    <div class="ok"><b>CHAT prompt:</b> "What is the difference between Pub/Sub push and pull subscriptions? When would I use pull instead of push for my vehicle ETL pipeline?"</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#d1fae5;color:#065f46">11.2</div><div class="st"><b>Architecture — How the 3 new files fit your project</b><span>pubsub_trigger.py · simulate_gcs_upload.py · changes to api.py</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <div class="tool-row"><span class="tool t-cowork">🟨 COWORK — already implemented</span></div>
+    <table>
+      <tr><th>File</th><th>What it does</th><th>When it runs</th></tr>
+      <tr><td><code>pubsub_trigger.py</code></td><td>FastAPI router with POST /etl/trigger. Decodes the Pub/Sub message, validates it is a raw/ CSV, calls run_etl()</td><td>Every time Pub/Sub pushes a notification</td></tr>
+      <tr><td><code>simulate_gcs_upload.py</code></td><td>Sends a fake GCS event to your local API. Used for local testing without real GCS</td><td>You run it manually during development</td></tr>
+      <tr><td><code>api.py</code> (modified)</td><td>Added <code>from pubsub_trigger import router as etl_router</code> and <code>app.include_router(etl_router)</code></td><td>Always (part of your API)</td></tr>
+    </table>
+    <h4>The Pub/Sub message flow decoded</h4>
+    <pre># What GCS sends to Pub/Sub when raw/fleet.csv is uploaded:
+{
+  "bucket":    "vehicle-logs-sachin",
+  "name":      "raw/fleet_2024_01.csv",
+  "eventType": "OBJECT_FINALIZE",
+  "contentType": "text/csv"
+}
+
+# Pub/Sub wraps this in base64 and POSTs to /etl/trigger:
+{
+  "message": {
+    "data": "eyJidWNrZXQiOiAidmVoaWNsZS1sb2dzLXNhY2hpbiJ9...",
+    "messageId": "abc123",
+    "publishTime": "2024-01-01T00:00:00Z"
+  },
+  "subscription": "projects/.../subscriptions/vehicle-csv-sub"
+}
+
+# pubsub_trigger.py:
+# 1. Decodes base64 → gets the GCS event JSON
+# 2. Checks: starts with raw/ AND ends with .csv?
+# 3. Checks: eventType == OBJECT_FINALIZE?
+# 4. Calls run_etl()
+# 5. Returns {"status": "success"} → Pub/Sub acknowledges, will not retry</pre>
+    <div class="anchor">📁 Files: <code>pubsub_trigger.py</code> (main logic) · <code>simulate_gcs_upload.py</code> (test helper) · <code>api.py</code> lines 4 + 16 (2 lines added)</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#d1fae5;color:#065f46">11.3</div><div class="st"><b>Local Testing — docker-compose emulator</b><span>Your docker-compose already has pubsub_emulator on port 8085</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <div class="tool-row"><span class="tool t-code">🟩 CODE — run in VS Code terminal</span></div>
+    <pre># Terminal 1 — start API + Pub/Sub emulator
+docker-compose up
+
+# Terminal 2 — create topic + subscription in emulator
+set PUBSUB_EMULATOR_HOST=localhost:8085
+python -c "
+from google.cloud import pubsub_v1
+pub = pubsub_v1.PublisherClient()
+sub = pubsub_v1.SubscriberClient()
+t = pub.topic_path('vehicle-diagnostics-491610', 'vehicle-csv-uploads')
+s = sub.subscription_path('vehicle-diagnostics-491610', 'vehicle-csv-sub')
+pub.create_topic(request={'name': t})
+sub.create_subscription(request={
+    'name': s, 'topic': t,
+    'push_config': {'push_endpoint': 'http://localhost:8080/etl/trigger'},
+    'ack_deadline_seconds': 300,
+})
+print('Done — emulator wired up')
+"
+
+# Terminal 3 — simulate a CSV upload (triggers ETL automatically)
+python simulate_gcs_upload.py
+
+# Expected output:
+# Status  : 200
+# Response: {"status": "success", "file": "raw/fleet_test_2024.csv"}</pre>
+    <div class="warn"><b>If ETL fails locally:</b> No GCP credentials locally is fine — the trigger mechanism is what you are testing. Real ETL only runs in Cloud Run with proper credentials.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#d1fae5;color:#065f46">11.4</div><div class="st"><b>Production Setup — 4 gcloud commands (one-time only)</b><span>Create topic · GCS notification · push subscription · IAM permission</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <div class="tool-row"><span class="tool t-code">🟩 CODE — run in Google Cloud SDK Shell</span></div>
+    <div class="danger">Run these only ONCE. Re-running will error "already exists" — that is fine, it means it is already set up.</div>
+    <pre># 1. Create the Pub/Sub topic
+gcloud pubsub topics create vehicle-csv-uploads \
+    --project=vehicle-diagnostics-491610
+
+# 2. Tell GCS to notify this topic when any file lands in raw/
+gcloud storage buckets notifications create gs://vehicle-logs-sachin \
+    --topic=vehicle-csv-uploads \
+    --event-types=OBJECT_FINALIZE \
+    --object-prefix=raw/ \
+    --payload-format=json \
+    --project=vehicle-diagnostics-491610
+
+# 3. Push subscription → your Cloud Run /etl/trigger endpoint
+gcloud pubsub subscriptions create vehicle-csv-sub \
+    --topic=vehicle-csv-uploads \
+    --push-endpoint=https://vehicle-diagnostics-api-746368083201.asia-south1.run.app/etl/trigger \
+    --ack-deadline=300 \
+    --min-retry-delay=10s \
+    --max-retry-delay=300s \
+    --project=vehicle-diagnostics-491610
+
+# 4. Allow Pub/Sub to invoke your Cloud Run service
+gcloud run services add-iam-policy-binding vehicle-diagnostics-api \
+    --region=asia-south1 \
+    --member=serviceAccount:service-746368083201@gcp-sa-pubsub.iam.gserviceaccount.com \
+    --role=roles/run.invoker \
+    --project=vehicle-diagnostics-491610</pre>
+    <div class="ok"><b>Verify:</b> Upload any CSV to <code>gs://vehicle-logs-sachin/raw/</code> → check Cloud Run logs → check BigQuery. Rows appear within 30 seconds automatically.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#d1fae5;color:#065f46">11.5</div><div class="st"><b>Key concepts — interview talking points</b><span>ACK · retry logic · idempotency · at-least-once delivery · dead letter topics</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <div class="tool-row"><span class="tool t-chat">🟦 CHAT — ask about each of these</span></div>
+    <h4>ACK (Acknowledgement)</h4>
+    <p>When /etl/trigger returns HTTP 200, Pub/Sub marks the message acknowledged and will not resend it. If you return 500 (ETL failed), Pub/Sub retries with exponential backoff (10s → 20s → ... → 300s max).</p>
+    <h4>At-least-once delivery + Idempotency</h4>
+    <p>Pub/Sub may deliver the same message twice in rare network conditions. Your ETL handles this safely — after processing, files move from <code>raw/</code> to <code>processed/</code>. A second run finds nothing in raw/ and exits cleanly. This is idempotency.</p>
+    <h4>Dead letter topics</h4>
+    <p>If a message fails repeatedly (ETL keeps crashing), Pub/Sub eventually moves it to a dead letter topic. You inspect dead letter messages to find which CSV files failed.</p>
+    <div class="ok"><b>CHAT prompts:</b><br>
+    1. "What is idempotency and why is it critical for Pub/Sub consumers?"<br>
+    2. "My ETL takes 45 seconds but my ack-deadline is 30 seconds. What happens? How do I fix it?"<br>
+    3. "What is a dead letter topic in GCP Pub/Sub? How do I set one up?"</div>
+    <div class="purple"><b>Interview answer:</b> "I replaced manual ETL triggering with an event-driven pipeline — GCS object notifications publish to a Pub/Sub topic, a push subscription calls my Cloud Run API endpoint, which runs the ETL automatically. The ETL is idempotent: processed files move from raw/ to processed/, so duplicate Pub/Sub deliveries are harmless. Failed runs return HTTP 500, triggering automatic retry with exponential backoff."</div>
+  </div>
+</div>
+</div><!-- end page 12 -->
+
+<!-- ═══════════════════════════════════ PAGE 13: CODE TOUR ═══ -->
+<div class="page" id="p13">
+<h3>Code Tour — Read the Codebase in This Exact Order</h3>
+<div class="info"><b>For a new developer joining this project:</b> Follow steps 1–13 in order. Each file builds on the previous one. Do not jump ahead — each file assumes you understand the files before it.</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#1e293b;color:#94a3b8">1</div><div class="st"><b>config.py</b> <span style="color:#64748b">— 9 lines · Read first, always</span><span>All GCP resource IDs · never hardcoded elsewhere · single source of truth</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <p><b>What to look for:</b> Every constant used across the project lives here. PROJECT_ID, BUCKET, BQ_TABLE, GEMINI_MODEL, EMBEDDING_MODEL, VS_INDEX_ID, VS_ENDPOINT_ID.</p>
+    <p><b>Why read this first:</b> Every other file imports from config.py. If you see <code>from config import BQ_TABLE</code> anywhere, you know exactly what value it holds.</p>
+    <p><b>Key rule:</b> Never hardcode these values in any other file. If a new GCP resource is added, it goes here first.</p>
+    <div class="ok">After reading: You know the full GCP topology — which project, which region, which bucket, which BigQuery table, which Vertex AI resources.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#1e293b;color:#94a3b8">2</div><div class="st"><b>etl.py</b> <span style="color:#64748b">— 87 lines · The data entry point</span><span>GCS → clean → BigQuery → embed → Vector Search · 4 functions</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <p><b>What to look for:</b> 4 functions that form a pipeline:</p>
+    <table>
+      <tr><th>Function</th><th>Does what</th><th>Reads from</th><th>Writes to</th></tr>
+      <tr><td><code>read_raw_files()</code></td><td>Lists all CSVs in gs://bucket/raw/</td><td>GCS</td><td>—</td></tr>
+      <tr><td><code>clean()</code></td><td>Parses CSV, adds timestamps, garage_id</td><td>Raw CSV text</td><td>DataFrame</td></tr>
+      <tr><td><code>load_to_bigquery()</code></td><td>Appends rows to error_logs table</td><td>DataFrame</td><td>BigQuery</td></tr>
+      <tr><td><code>embed_and_index()</code></td><td>Embeds error descriptions → upserts vectors</td><td>DataFrame</td><td>Vertex AI Vector Search</td></tr>
+      <tr><td><code>run_etl()</code></td><td>Orchestrates all 4 above in sequence</td><td>GCS</td><td>BigQuery + Vector Search</td></tr>
+    </table>
+    <p><b>Key concept:</b> After <code>run_etl()</code> completes, two things exist: rows in BigQuery (for SQL queries) and vectors in Vector Search (for semantic search). Both are needed downstream.</p>
+    <div class="ok">After reading: You understand where data comes from and where it goes before any AI touches it.</div>
+    <div class="anchor">📁 Run: <code>python etl.py</code> — reads raw/ CSVs, loads everything. Check BigQuery after.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#1e293b;color:#94a3b8">3</div><div class="st"><b>diagnostics.py</b> <span style="color:#64748b">— 63 lines · The AI brain</span><span>Pydantic schema · Gemini API · structured output · BigQuery history grounding</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <p><b>What to look for:</b></p>
+    <table>
+      <tr><th>Line(s)</th><th>What it does</th><th>Why it matters</th></tr>
+      <tr><td>14–18</td><td><code>DiagnosisResult</code> Pydantic model</td><td>Constrains Gemini output — risk_level can ONLY be High/Medium/Low</td></tr>
+      <tr><td>20–28</td><td><code>get_vehicle_history()</code></td><td>Pulls last 5 errors from BigQuery — this is the grounding context</td></tr>
+      <tr><td>31–50</td><td><code>diagnose()</code></td><td>Builds prompt with history → calls Gemini → returns typed DiagnosisResult</td></tr>
+      <tr><td>41</td><td><code>temperature=0.1</code></td><td>Near-deterministic output — same input = same diagnosis every time</td></tr>
+      <tr><td>43</td><td><code>response.parsed</code></td><td>Already a DiagnosisResult object — no JSON parsing needed</td></tr>
+    </table>
+    <p><b>The hallucination prevention chain here:</b> Pydantic schema (layer 1) + temperature=0.1 (layer 2) + BigQuery history context (layer 3) all work together in this one file.</p>
+    <div class="ok">After reading: You understand how raw Gemini API calls work, what structured output means, and why the prompt injects BigQuery history.</div>
+    <div class="anchor">📁 Run: <code>python diagnostics.py</code> — diagnoses VEH101/P0171 and prints result.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#1e293b;color:#94a3b8">4</div><div class="st"><b>api.py</b> <span style="color:#64748b">— 125 lines · The HTTP layer</span><span>FastAPI · Pydantic request/response models · 5 endpoints · async · routers</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <p><b>What to look for:</b> How diagnostics.py and etl.py are exposed as HTTP endpoints.</p>
+    <table>
+      <tr><th>Endpoint</th><th>Calls</th><th>Returns</th></tr>
+      <tr><td>GET /health</td><td>nothing</td><td>status ok</td></tr>
+      <tr><td>GET /vehicle/{id}</td><td>BigQuery directly</td><td>last 20 errors</td></tr>
+      <tr><td>GET /fleet/summary</td><td>BigQuery directly</td><td>top 10 error codes</td></tr>
+      <tr><td>GET /diagnose/{id}/{code}</td><td>diagnostics.diagnose()</td><td>DiagnoseResponse</td></tr>
+      <tr><td>GET /search?symptom=</td><td>Vertex AI Vector Search</td><td>top-3 similar errors</td></tr>
+      <tr><td>POST /etl/trigger</td><td>pubsub_trigger → run_etl()</td><td>ETL status</td></tr>
+      <tr><td>GET /fleet/live-feed</td><td>live_feed → BQ+RAG+Gemini</td><td>full JSON feed</td></tr>
+      <tr><td>GET /fleet/dashboard</td><td>live_feed → HTML</td><td>live dashboard</td></tr>
+    </table>
+    <p><b>Key pattern:</b> Every endpoint has a Pydantic response_model — the return type is fully typed and auto-documented in /docs.</p>
+    <div class="ok">After reading: You understand how the AI layer (diagnostics.py) is wrapped into a production API. Visit /docs on localhost to see the auto-generated Swagger UI.</div>
+    <div class="anchor">📁 Run: <code>uvicorn api:app --reload --port 8080</code> then open http://localhost:8080/docs</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#1e293b;color:#94a3b8">5</div><div class="st"><b>pubsub_trigger.py</b> <span style="color:#64748b">— 170 lines · Event-driven automation</span><span>Pub/Sub push · GCS notifications · auto-ETL · base64 decoding</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <p><b>What to look for:</b> The <code>POST /etl/trigger</code> endpoint. Understand how a Pub/Sub message arrives (base64-wrapped JSON), how it is decoded, and how it calls <code>run_etl()</code>.</p>
+    <p><b>Key logic:</b> Only files matching <code>raw/*.csv</code> trigger ETL. Any other file (logs, images, temp files) is skipped by returning 200 — so Pub/Sub does not retry it.</p>
+    <p><b>Connection to etl.py:</b> This file is the automated trigger for <code>run_etl()</code>. Before this file existed, someone had to run <code>python etl.py</code> manually.</p>
+    <div class="ok">After reading: You understand event-driven architecture — how a file upload in GCS automatically cascades through Pub/Sub into your ETL pipeline with zero human action.</div>
+    <div class="anchor">📁 Test: Run <code>python simulate_gcs_upload.py</code> while API is running — you will see ETL trigger automatically.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#1e293b;color:#94a3b8">6</div><div class="st"><b>live_feed.py</b> <span style="color:#64748b">— 529 lines · Full pipeline in one file</span><span>BigQuery → RAG → Gemini → aggregate → JSON + HTML dashboard</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <p><b>What to look for:</b> Read the 4 stage functions in order:</p>
+    <table>
+      <tr><th>Function</th><th>Stage</th><th>What it does</th></tr>
+      <tr><td><code>fetch_recent_errors()</code></td><td>1 — BigQuery</td><td>SQL query for last 2h errors, extracts garage_id from file path</td></tr>
+      <tr><td><code>fetch_similar_errors()</code></td><td>2 — RAG</td><td>Embeds symptom → Vector Search → returns similar past errors</td></tr>
+      <tr><td><code>diagnose_with_rag_context()</code></td><td>3 — LLM</td><td>Gemini diagnosis with RAG context injected into prompt</td></tr>
+      <tr><td><code>build_garage_feed()</code></td><td>4 — Aggregate</td><td>Groups diagnoses by garage, counts risk levels</td></tr>
+      <tr><td><code>live_feed()</code> endpoint</td><td>Orchestrator</td><td>Calls all 4 stages, returns LiveFeedResponse</td></tr>
+      <tr><td><code>fleet_dashboard()</code> endpoint</td><td>UI</td><td>Returns HTML page with JS that polls /fleet/live-feed every 30s</td></tr>
+    </table>
+    <p><b>This file shows the complete GenAI pattern:</b> structured data retrieval (BigQuery) → semantic retrieval (Vector Search / RAG) → LLM generation grounded in both → typed response → live UI.</p>
+    <div class="ok">After reading: You can trace any vehicle diagnosis from raw data all the way to a live browser screen.</div>
+    <div class="anchor">📁 Open: http://localhost:8080/fleet/dashboard — the full pipeline running live.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#1e293b;color:#94a3b8">7</div><div class="st"><b>agent.py</b> <span style="color:#64748b">— 99 lines · Autonomous orchestration with Google ADK</span><span>LlmAgent · FunctionTool · Runner · InMemorySessionService · tool docstrings</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <p><b>What to look for:</b> 4 FunctionTools and how ADK connects them. The agent decides autonomously which tools to call and in what order — you do not wire the sequence manually.</p>
+    <table>
+      <tr><th>Tool</th><th>When ADK calls it</th><th>Calls into</th></tr>
+      <tr><td><code>fetch_and_load()</code></td><td>First — always</td><td>etl.py run_etl()</td></tr>
+      <tr><td><code>fleet_summary()</code></td><td>After load</td><td>BigQuery directly</td></tr>
+      <tr><td><code>diagnose_error()</code></td><td>Per vehicle+error pair</td><td>diagnostics.diagnose()</td></tr>
+      <tr><td><code>send_alert()</code></td><td>Only when risk_level==High</td><td>logging (extend to email/SMS)</td></tr>
+    </table>
+    <p><b>Key insight:</b> The docstring on each function IS the tool description Gemini reads. Change the docstring → change when and how the agent decides to use the tool.</p>
+    <div class="ok">After reading: You understand agentic AI — how an LLM autonomously decides tool order vs how LangGraph makes the order explicit.</div>
+    <div class="anchor">📁 Run: <code>python agent.py</code> — watch it fetch, summarise, diagnose, and alert autonomously.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#1e293b;color:#94a3b8">8</div><div class="st"><b>langgraph_agent.py</b> <span style="color:#64748b">— 66 lines · Explicit state graph (compare with agent.py)</span><span>StateGraph · TypedDict · conditional edges · nodes · checkpointer</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <p><b>What to look for:</b> Read this immediately after agent.py. Same goal, different approach.</p>
+    <p><b>ADK (agent.py):</b> LLM decides what to do. Flexible but unpredictable. No guaranteed execution order.</p>
+    <p><b>LangGraph (this file):</b> You define the graph. Nodes = steps. Conditional edges = branching. The path is explicit and inspectable.</p>
+    <p><b>Key pattern to understand:</b> The TypedDict state flows through every node. Each node reads the state, does work, returns updated state. The conditional edge after diagnose checks risk_level and routes to alert or skip.</p>
+    <div class="ok">After reading: You can explain in an interview why you would choose LangGraph over ADK for a workflow that needs human approval before taking action.</div>
+    <div class="anchor">📁 Run: <code>python langgraph_agent.py</code> — compare with agent.py output.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#1e293b;color:#94a3b8">9</div><div class="st"><b>langchain_diagnose.py</b> <span style="color:#64748b">— 59 lines · LangChain LCEL chain</span><span>Pipe operator · ChatPromptTemplate · Runnable · compare with raw Gemini call</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <p><b>What to look for:</b> The <code>|</code> pipe operator chaining prompt → LLM → parser. Compare the code structure with diagnostics.py (raw Gemini). They do the same thing — LangChain adds composability and LangSmith tracing at the cost of an extra dependency.</p>
+    <p><b>When to prefer this over diagnostics.py:</b> When you need to swap models easily (Gemini → Claude → OpenAI with 1 line), add middleware (retry, caching), or instrument with LangSmith without adding @traceable manually.</p>
+    <div class="ok">After reading: You understand what LangChain actually adds over raw API calls — and when it is not worth adding.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#1e293b;color:#94a3b8">10</div><div class="st"><b>fleet_crew.py</b> <span style="color:#64748b">— 104 lines · Multi-agent with CrewAI</span><span>Crew · Agent roles · Task · Process.sequential · division of labour</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <p><b>What to look for:</b> 3 Agents with different roles (Analyst, Diagnostician, Reporter). Each has its own system prompt (backstory), goal, and tools. They hand off work sequentially.</p>
+    <p><b>Why this beats a single agent for reporting:</b> The Reporter agent only sees the Diagnostician's output — it is focused purely on writing. A single agent asked to analyse + diagnose + write produces lower quality output because it splits attention.</p>
+    <p><b>Compare with agent.py:</b> ADK has one agent doing everything. CrewAI has three specialists. Same outcome, different quality on the reporting step.</p>
+    <div class="ok">After reading: You understand when multi-agent (role separation) outperforms single-agent (flexibility).</div>
+    <div class="anchor">📁 Run: <code>python fleet_crew.py</code> — outputs a formatted maintenance report.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#1e293b;color:#94a3b8">11</div><div class="st"><b>vehicle_mcp_server.py + mcp_client.py</b> <span style="color:#64748b">— 53 + 44 lines · MCP protocol</span><span>stdio transport · tool definitions · Claude Desktop integration</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <p><b>What to look for in vehicle_mcp_server.py:</b> Tool definitions (name, description, inputSchema). The description field is what Claude Desktop reads to decide when to call each tool. Note: logging goes to stderr, not stdout — stdout is the MCP protocol channel.</p>
+    <p><b>What to look for in mcp_client.py:</b> How to call an MCP server programmatically — spawn the server as a subprocess, communicate via stdin/stdout, call tools by name.</p>
+    <p><b>Key concept:</b> MCP is a standard protocol. The same server works with Claude Desktop, Cursor, or any MCP-compatible client. You write it once, any client can use it.</p>
+    <div class="ok">After reading: You understand why MCP exists — it standardises tool interfaces so you do not rewrite integrations for every LLM client.</div>
+    <div class="anchor">📁 Run: Terminal 1: <code>python vehicle_mcp_server.py</code> · Terminal 2: <code>python mcp_client.py</code></div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#1e293b;color:#94a3b8">12</div><div class="st"><b>run_evals.py</b> <span style="color:#64748b">— 112 lines · LLM evaluation with LangSmith</span><span>Eval datasets · LLM-as-judge · regression testing · classification accuracy</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <p><b>What to look for:</b> How evaluation datasets are created, how the diagnose() function is wrapped as an evaluatable target, and how LangSmith scores the outputs.</p>
+    <p><b>Why this file matters:</b> Without evals, you have no way to know if a Gemini model update (e.g., Flash 1.5 → 2.5) changed your diagnosis quality. run_evals.py is your regression test suite for AI behaviour.</p>
+    <p><b>Key pattern:</b> Define (input, expected_output) pairs → run your pipeline against them → score with an evaluator → track scores over time in LangSmith dashboard.</p>
+    <div class="ok">After reading: You can explain LLM observability in interviews — why traditional unit tests are insufficient for LLM systems and what eval frameworks add.</div>
+    <div class="anchor">📁 Run: <code>python run_evals.py</code> — requires LANGCHAIN_API_KEY in .env.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="sh" onclick="tog(this)"><div class="sn" style="background:#1e293b;color:#94a3b8">13</div><div class="st"><b>simulate_gcs_upload.py + manual_qa.py</b> <span style="color:#64748b">— Testing utilities</span><span>End-to-end testing without touching real GCS · manual Q&amp;A validation</span></div><div class="arr">▼</div></div>
+  <div class="sb">
+    <p><b>simulate_gcs_upload.py:</b> Sends a fake Pub/Sub push message to your local API as if a CSV was uploaded to GCS. Use this every time you change pubsub_trigger.py to verify the trigger still works without needing to upload a real file.</p>
+    <p><b>manual_qa.py:</b> A scratchpad for running quick one-off diagnostics against your live API. Use this to spot-check that a specific vehicle+error_code combination is being diagnosed correctly before running the full eval suite.</p>
+    <div class="ok">After reading all 13 files: You can trace any data point from a vehicle OBD-II scanner all the way through GCS → ETL → BigQuery → Vector Search → Gemini → API response → live dashboard. You understand every design decision and can explain it in an interview.</div>
+  </div>
+</div>
+
+<br>
+<div class="warn" style="font-size:12px">
+<b>Reading order summary:</b><br>
+config.py → etl.py → diagnostics.py → api.py → pubsub_trigger.py → live_feed.py → agent.py → langgraph_agent.py → langchain_diagnose.py → fleet_crew.py → vehicle_mcp_server.py + mcp_client.py → run_evals.py → simulate_gcs_upload.py + manual_qa.py
+</div>
+</div><!-- end page 13 -->
+
 <script>
 function show(n){
   document.querySelectorAll('.page').forEach((p,i)=>p.classList.toggle('on',i===n));

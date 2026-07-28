@@ -1,0 +1,4 @@
+{
+  "frozen_at": "2026-07-28T06:43:46.806992+00:00",
+  "reason": "Alert raised at request #32: ['p95 latency 791ms > 700ms']"
+}

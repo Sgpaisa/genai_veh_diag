@@ -1,0 +1,92 @@
+{
+  "timestamp": "2026-07-28T06:43:37.045331+00:00",
+  "n_cases": 10,
+  "risk_accuracy": 1.0,
+  "risk_accuracy_threshold": 0.9,
+  "avg_judge_score": 4.6,
+  "judge_score_threshold": 3.5,
+  "p95_latency_ms": 271,
+  "gate_result": "PASS",
+  "rows": [
+    {
+      "error_code": "P0171",
+      "expected_risk": "High",
+      "predicted_risk": "High",
+      "risk_correct": 1,
+      "judge_score": 5.0,
+      "latency_ms": 307
+    },
+    {
+      "error_code": "P0128",
+      "expected_risk": "Medium",
+      "predicted_risk": "Medium",
+      "risk_correct": 1,
+      "judge_score": 5.0,
+      "latency_ms": 225
+    },
+    {
+      "error_code": "P0300",
+      "expected_risk": "High",
+      "predicted_risk": "High",
+      "risk_correct": 1,
+      "judge_score": 5.0,
+      "latency_ms": 213
+    },
+    {
+      "error_code": "P0420",
+      "expected_risk": "Medium",
+      "predicted_risk": "Medium",
+      "risk_correct": 1,
+      "judge_score": 3.0,
+      "latency_ms": 188
+    },
+    {
+      "error_code": "P0171",
+      "expected_risk": "High",
+      "predicted_risk": "High",
+      "risk_correct": 1,
+      "judge_score": 3.0,
+      "latency_ms": 239
+    },
+    {
+      "error_code": "P0442",
+      "expected_risk": "Low",
+      "predicted_risk": "Low",
+      "risk_correct": 1,
+      "judge_score": 5.0,
+      "latency_ms": 184
+    },
+    {
+      "error_code": "P0217",
+      "expected_risk": "High",
+      "predicted_risk": "High",
+      "risk_correct": 1,
+      "judge_score": 5.0,
+      "latency_ms": 231
+    },
+    {
+      "error_code": "P0562",
+      "expected_risk": "Medium",
+      "predicted_risk": "Medium",
+      "risk_correct": 1,
+      "judge_score": 5.0,
+      "latency_ms": 238
+    },
+    {
+      "error_code": "P0011",
+      "expected_risk": "High",
+      "predicted_risk": "High",
+      "risk_correct": 1,
+      "judge_score": 5.0,
+      "latency_ms": 245
+    },
+    {
+      "error_code": "P0455",
+      "expected_risk": "Low",
+      "predicted_risk": "Low",
+      "risk_correct": 1,
+      "judge_score": 5.0,
+      "latency_ms": 271
+    }
+  ]
+}

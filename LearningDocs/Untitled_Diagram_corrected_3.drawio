@@ -1,0 +1,46 @@
+<mxfile host="Electron">
+  <diagram name="Page-1" id="0b5II0Fq3zBJN1jl89qB-fixed">
+    <mxGraphModel dx="860" dy="573" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="900" pageHeight="500" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;align=left;verticalAlign=middle;fontSize=16;fontStyle=1;fontColor=#1A1A1A;" value="Vehicle Diagnostics — Data Flow &amp; Serving (simplified)" vertex="1">
+          <mxGeometry height="26" width="600" x="30" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="raw" parent="1" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.direct_data;whiteSpace=wrap;fillColor=#F5F5F5;strokeColor=#808080;" value="Raw CSV vehicle logs" vertex="1">
+          <mxGeometry height="60" width="120" x="40" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="bq" parent="1" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#DAE8FC;strokeColor=#6C8EBF;fontSize=12;align=center;verticalAlign=middle;" value="BigQuery&lt;br&gt;(diagnostic-data service)" vertex="1">
+          <mxGeometry height="80" width="180" x="230" y="170" as="geometry" />
+        </mxCell>
+        <mxCell id="pubsub" parent="1" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=12;align=center;verticalAlign=middle;" value="Pub/Sub" vertex="1">
+          <mxGeometry height="60" width="150" x="500" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="docker" parent="1" style="image;sketch=0;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/mscae/Docker.svg;" value="" vertex="1">
+          <mxGeometry height="30" width="36" x="500" y="195" as="geometry" />
+        </mxCell>
+        <mxCell id="api" parent="1" style="rounded=1;arcSize=10;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=12;align=center;verticalAlign=middle;" value="FastAPI (Dockerized)&lt;br&gt;5 endpoints — MCP tool layer" vertex="1">
+          <mxGeometry height="80" width="210" x="500" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="run" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#FFE6CC;strokeColor=#D79B00;fontSize=12;align=center;verticalAlign=middle;" value="Cloud Run&lt;br&gt;deploy &amp; serve" vertex="1">
+          <mxGeometry height="90" width="100" x="760" y="225" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="raw" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontSize=11;labelBackgroundColor=#FFFFFF;" target="bq" value="ingest">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="bq" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontSize=11;labelBackgroundColor=#FFFFFF;" target="pubsub" value="publish fault alerts">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="bq" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontSize=11;labelBackgroundColor=#FFFFFF;dashed=1;dashPattern=6 4;strokeColor=#9673A6;" target="api" value="query via MCP tool">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="pubsub" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontSize=11;labelBackgroundColor=#FFFFFF;" target="api" value="push event">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="api" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;endArrow=block;fontSize=11;labelBackgroundColor=#FFFFFF;" target="run" value="deploy image">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

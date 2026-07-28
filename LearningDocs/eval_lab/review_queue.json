@@ -1,0 +1,178 @@
+[
+  {
+    "seq": 17,
+    "timestamp": "2026-07-28T06:43:41.326981+00:00",
+    "error_code": "P0171",
+    "predicted_risk": "High",
+    "expected_risk": null,
+    "spot_checked": false,
+    "correct": null,
+    "latency_ms": 285,
+    "drift_injected": false
+  },
+  {
+    "seq": 18,
+    "timestamp": "2026-07-28T06:43:41.332260+00:00",
+    "error_code": "P0420",
+    "predicted_risk": "Medium",
+    "expected_risk": null,
+    "spot_checked": false,
+    "correct": null,
+    "latency_ms": 317,
+    "drift_injected": false
+  },
+  {
+    "seq": 19,
+    "timestamp": "2026-07-28T06:43:41.338894+00:00",
+    "error_code": "P0171",
+    "predicted_risk": "High",
+    "expected_risk": null,
+    "spot_checked": false,
+    "correct": null,
+    "latency_ms": 290,
+    "drift_injected": false
+  },
+  {
+    "seq": 20,
+    "timestamp": "2026-07-28T06:43:41.345090+00:00",
+    "error_code": "P0455",
+    "predicted_risk": "Low",
+    "expected_risk": "Low",
+    "spot_checked": true,
+    "correct": true,
+    "latency_ms": 227,
+    "drift_injected": false
+  },
+  {
+    "seq": 21,
+    "timestamp": "2026-07-28T06:43:41.351983+00:00",
+    "error_code": "P0420",
+    "predicted_risk": "Medium",
+    "expected_risk": null,
+    "spot_checked": false,
+    "correct": null,
+    "latency_ms": 314,
+    "drift_injected": false
+  },
+  {
+    "seq": 22,
+    "timestamp": "2026-07-28T06:43:41.357529+00:00",
+    "error_code": "P0011",
+    "predicted_risk": "High",
+    "expected_risk": null,
+    "spot_checked": false,
+    "correct": null,
+    "latency_ms": 202,
+    "drift_injected": false
+  },
+  {
+    "seq": 23,
+    "timestamp": "2026-07-28T06:43:41.363420+00:00",
+    "error_code": "P0562",
+    "predicted_risk": "Medium",
+    "expected_risk": "Medium",
+    "spot_checked": true,
+    "correct": true,
+    "latency_ms": 232,
+    "drift_injected": false
+  },
+  {
+    "seq": 24,
+    "timestamp": "2026-07-28T06:43:41.370805+00:00",
+    "error_code": "P0420",
+    "predicted_risk": "Medium",
+    "expected_risk": "Medium",
+    "spot_checked": true,
+    "correct": true,
+    "latency_ms": 233,
+    "drift_injected": false
+  },
+  {
+    "seq": 25,
+    "timestamp": "2026-07-28T06:43:41.376018+00:00",
+    "error_code": "P0455",
+    "predicted_risk": "Low",
+    "expected_risk": null,
+    "spot_checked": false,
+    "correct": null,
+    "latency_ms": 267,
+    "drift_injected": false
+  },
+  {
+    "seq": 26,
+    "timestamp": "2026-07-28T06:43:41.380973+00:00",
+    "error_code": "P0420",
+    "predicted_risk": "Medium",
+    "expected_risk": null,
+    "spot_checked": false,
+    "correct": null,
+    "latency_ms": 208,
+    "drift_injected": false
+  },
+  {
+    "seq": 27,
+    "timestamp": "2026-07-28T06:43:41.387575+00:00",
+    "error_code": "P0217",
+    "predicted_risk": "High",
+    "expected_risk": null,
+    "spot_checked": false,
+    "correct": null,
+    "latency_ms": 215,
+    "drift_injected": false
+  },
+  {
+    "seq": 28,
+    "timestamp": "2026-07-28T06:43:41.392999+00:00",
+    "error_code": "P0455",
+    "predicted_risk": "Low",
+    "expected_risk": "Low",
+    "spot_checked": true,
+    "correct": true,
+    "latency_ms": 262,
+    "drift_injected": false
+  },
+  {
+    "seq": 29,
+    "timestamp": "2026-07-28T06:43:41.397944+00:00",
+    "error_code": "P0300",
+    "predicted_risk": "High",
+    "expected_risk": null,
+    "spot_checked": false,
+    "correct": null,
+    "latency_ms": 283,
+    "drift_injected": false
+  },
+  {
+    "seq": 30,
+    "timestamp": "2026-07-28T06:43:41.404806+00:00",
+    "error_code": "P0171",
+    "predicted_risk": "High",
+    "expected_risk": "High",
+    "spot_checked": true,
+    "correct": true,
+    "latency_ms": 293,
+    "drift_injected": false
+  },
+  {
+    "seq": 31,
+    "timestamp": "2026-07-28T06:43:41.410410+00:00",
+    "error_code": "P0442",
+    "predicted_risk": "Low",
+    "expected_risk": null,
+    "spot_checked": false,
+    "correct": null,
+    "latency_ms": 1070,
+    "drift_injected": true
+  },
+  {
+    "seq": 32,
+    "timestamp": "2026-07-28T06:43:41.415974+00:00",
+    "error_code": "P0171",
+    "predicted_risk": "High",
+    "expected_risk": "High",
+    "spot_checked": true,
+    "correct": true,
+    "latency_ms": 791,
+    "drift_injected": true
+  }
+]

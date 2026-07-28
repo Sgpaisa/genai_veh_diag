@@ -2,6 +2,8 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 from google.cloud import bigquery, aiplatform
 from diagnostics import diagnose, DiagnosisResult
+from pubsub_trigger import router as etl_router
+from live_feed import router as feed_router
 from dotenv import load_dotenv
 import logging
 from config import PROJECT_ID, REGION, BQ_TABLE, EMBEDDING_MODEL, VS_ENDPOINT_ID
@@ -12,6 +14,8 @@ aiplatform.init(project=PROJECT_ID, location=REGION)
 
 app = FastAPI(title="Vehicle Diagnostic API", version="2.0",
               description="Fleet OBD-II diagnostics — Gemini + Vertex AI + Google ADK")
+app.include_router(etl_router)   # POST /etl/trigger  — Pub/Sub push endpoint
+app.include_router(feed_router)  # GET  /fleet/live-feed + /fleet/dashboard
 bq = bigquery.Client()
 
 
